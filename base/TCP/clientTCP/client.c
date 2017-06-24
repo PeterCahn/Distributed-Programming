@@ -20,11 +20,6 @@
 #define MAXLEN 32
 #define BUFLEN 256
 
-#define GET_B   "GET"
-#define QUIT_B  "QUIT\r\n"
-#define OK_B    "OK\r\n" 
-#define ERR_B   "ERR\r\n"
-
 #define MAX_REC_BYTE 5
 
 
@@ -193,17 +188,25 @@ int clientInitTcpConnection(const char* address, const char* port){
     for( res = servinfo; res != NULL ; res = res->ai_next){
                
         if( ( s = socket(res->ai_family, res->ai_socktype, res->ai_protocol) ) < 0 ){
-		    printf("Error creating master socket\n");
-		    continue;
-		}
+	  printf("Error creating master socket\n");
+	  continue;
+	}
+
+	// let reuse of socket address on local machine
+	int enable = 1;
+	if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0){
+	  printf("setsockopt(SO_REUSEADDR) failed");
+	  close(s);
+	  exit(-1);
+	}
 		
-		if( connect(s, res->ai_addr, res->ai_addrlen) < 0 ){
-		    perror("connect");
-		    close(s);
-		    continue;
-		}
+	if( connect(s, res->ai_addr, res->ai_addrlen) < 0 ){
+	    perror("connect");
+	    close(s);
+	    continue;
+	}
 		
-		// get the pointer to the address itself
+	// get the pointer to the address itself
         if (res->ai_family == AF_INET) { // IPv4
             struct sockaddr_in *ipv4 = (struct sockaddr_in *)res->ai_addr;
             addr = &(ipv4->sin_addr);
@@ -223,12 +226,12 @@ int clientInitTcpConnection(const char* address, const char* port){
     if(res == NULL){
     	printf("(%d) Impossible to connect to the server\n", getpid());
     	exit(-1);
-	}
+    }
     
     assert(res != NULL);
     
-	printf("(%d) socket created\n", getpid());
-	printf("(%d) connected to server %s:%s\n", getpid(), ipstr, port );
+    printf("(%d) socket created\n", getpid());
+    printf("(%d) connected to server %s:%s\n", getpid(), ipstr, port );
     
     return s;
     
