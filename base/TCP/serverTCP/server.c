@@ -395,4 +395,4 @@ int writen(int s, char *ptr, size_t nbytes){
     }
     return (nbytes-nleft);
 }
-z
+
