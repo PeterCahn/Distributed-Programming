@@ -45,11 +45,11 @@ int main(int argc, char * argv[]){
     int s, i, pid[MAXCLIENTS];
     
     
-    if(argc != 2){
-        printf("usage: %s <port>\n", argv[0]);
+    if(argc != 3){
+        printf("usage: %s <port> <K>\n", argv[0]);
         exit(1);   
     }
-    k = 15;
+    k = atoi(argv[2]);
     
      // Establish handling of SIGCHLD signal 
     if (signal(SIGCHLD, signalHandler) == SIG_ERR) {
@@ -65,6 +65,7 @@ int main(int argc, char * argv[]){
     		exit(1);
     	}
     }
+    sleep(60);
     wait(0);
     
     return 0;
@@ -77,7 +78,7 @@ void handleClient(int s){
     uint32_t op1, op2, id, res;
 	
 	while(1){
-	
+//		sleep(5);
 		/* receive id */
 		csize = sizeof(client);
 		if( recvfrom(s, &id, 4, 0, (struct sockaddr *) &client, &csize) < 0){
